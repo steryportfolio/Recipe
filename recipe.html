@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KitchenChronicles.com</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            margin-top: 60px; /* Space for fixed nav */
+            background-color: #f9f9f9;
+        }
+
+        nav {
+            background: #000000;
+            padding: 10px 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 10;
+            flex-wrap: wrap;
+        }
+
+        nav .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            margin-right: auto;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            flex-wrap: wrap;
+        }
+
+        nav ul li {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #44f84d;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            margin-left: 20px;
+        }
+
+        .search-container input {
+            padding: 0.5em;
+            border: 1px solid #15da60;
+            border-radius: 5px;
+            width: 150px;
+            max-width: 100%;
+            margin-right: 10px;
+        }
+
+        .search-container button {
+            padding: 0.5em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #006400;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-container button:hover {
+            background-color: #004d00;
+        }
+
+        .img {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/Images/background.jpg');
+            background-size: cover;
+            background-position: center;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            text-align: center;
+            position: relative;
+        }
+
+        .img::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .recipes {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1em;
+            padding: 1em;
+        }
+
+        .recipe {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 220px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(36, 19, 19, 0.1);
+            text-align: center;
+            cursor: pointer;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .recipe img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .recipe h3 {
+            margin: 0.5em 0;
+        }
+
+        .recipe:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .recipe-steps {
+            margin-top: 1em;
+            text-align: left;
+        }
+
+        .recipe-steps p {
+            margin: 0.5em 0;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 5px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <nav>
+        <div class="logo">Kitchen Chronicles</div>
+        <ul>
+            <li><a href="http://127.0.0.1:5500/Home.html">Home</a></li>
+            <li><a href="#about">About Us</a></li>
+            <li><a href="#">Recipes</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <div class="search-container">
+            <input type="text" id="search" placeholder="Search recipes..." oninput="applyFilters()">
+            <button onclick="applyFilters()">Search</button>
+        </div>
+    </nav>
+</header>
+
+<div class="recipes" id="recipe-list">
+    <!-- Recipe cards will be inserted here by JavaScript -->
+</div>
+
+<!-- The Modal -->
+<div id="recipeModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <img id="modalImage" src="" alt="" style="width: 100%; height: auto; border-radius: 5px;">
+        <p id="modalDescription"></p>
+        <div id="modalRecipeSteps" class="recipe-steps">
+            <!-- Recipe steps will be inserted here -->
+        </div>
+    </div>
+</div>
+
+<script>
+    const recipes = [
+        // Breakfast
+        { id: 1, name: 'Pancakes', category: 'breakfast', time: 20, description: 'Fluffy pancakes with syrup.', image: '/Images/Pancakes.jpg', recipeSteps: ['Mix flour, eggs, milk, and sugar.', 'Cook on a griddle.', 'Serve with syrup.'], type: 'veg' },
+        { id: 2, name: 'Omelette', category: 'breakfast', time: 15, description: 'Cheese and ham omelette.', image: '/Images/omelette.jpg', recipeSteps: ['Beat eggs.', 'Cook with cheese and ham in a skillet.', 'Fold and serve.'], type: 'non-veg' },
+        { id: 3, name: 'French Toast', category: 'breakfast', time: 15, description: 'Golden brown French toast with syrup.', image: '/Images/french toast.jpg', recipeSteps: ['Whisk eggs, milk, and cinnamon.', 'Dip bread slices in the mixture.', 'Cook on a griddle until golden brown.', 'Serve with syrup.'], type: 'veg' },
+        { id: 4, name: 'Idli Sambar', category: 'breakfast', time: 30, description: 'Steamed rice cakes served with lentil stew.', image: '/Images/idli sambhar.jpg', recipeSteps: ['Prepare the idli batter and steam.', 'Cook sambar with lentils and vegetables.', 'Serve idlis with hot sambar.'], type: 'veg' },
+        { id: 5, name: 'Medu Vada', category: 'breakfast', time: 25, description: 'Crispy lentil donuts served with chutney.', image: '/Images/medu vada.jpg', recipeSteps: ['Grind lentils to make a batter.', 'Shape into donuts and deep fry until golden brown.', 'Serve with coconut chutney.'], type: 'veg' },
+        
+        // Lunch
+        { id: 6, name: 'Caesar Salad', category: 'lunch', time: 10, description: 'Classic Caesar salad.', image: '/Images/caser salad.jpg', recipeSteps: ['Toss romaine lettuce with Caesar dressing.', 'Add croutons and Parmesan cheese.'], type: 'veg' },
+        { id: 7, name: 'Grilled Cheese Sandwich', category: 'lunch', time: 10, description: 'Cheesy grilled sandwich.', image: '/Images/Grilled Cheese Sandwich.jpg', recipeSteps: ['Butter bread slices.', 'Add cheese and grill until golden brown.'], type: 'veg' },
+        { id: 8, name: 'Chicken in White Sauce Pasta', category: 'lunch', time: 30, description: 'Creamy chicken pasta in white sauce.', image: '/Images/chicken in white sauce.jpg', recipeSteps: ['Cook pasta and chicken.', 'Prepare white sauce with butter, flour, and milk.', 'Mix pasta and chicken in the sauce.'], type: 'non-veg' },
+        { id: 9, name: 'Red Sauce Pasta', category: 'lunch', time: 25, description: 'Pasta with tangy tomato-based red sauce.', image: '/Images/Red Sauce Pasta.webp', recipeSteps: ['Cook pasta.', 'Prepare red sauce with tomatoes, garlic, and herbs.', 'Mix pasta in the sauce and serve.'], type: 'veg' },
+        { id: 10, name: 'Butter Chicken', category: 'lunch', time: 40, description: 'Creamy tomato-based chicken curry.', image: '/Images/Butter Chicken.jpg', recipeSteps: ['Cook chicken in a creamy tomato sauce.', 'Serve with naan or rice.'], type: 'non-veg' },
+        { id: 11, name: 'Tomato Soup', category: 'lunch', time: 20, description: 'Smooth and creamy tomato soup.', image: '/Images/tomato soup.jpg', recipeSteps: ['Cook tomatoes with garlic and onions.', 'Blend and strain the mixture.', 'Serve hot with a dollop of cream.'], type: 'veg' },
+        { id: 12, name: 'Chicken and Potatoes', category: 'lunch', time: 45, description: 'Roasted chicken with potatoes.', image: '/Images/chicken and potatoes.webp', recipeSteps: ['Season chicken and potatoes.', 'Roast in the oven until golden brown.', 'Serve with gravy or sauce.'], type: 'non-veg' },
+        { id: 13, name: 'Paneer Tikka Masala', category: 'lunch', time: 35, description: 'Paneer cubes in a rich and spicy masala.', image: '/Images/panner  tikka masala.webp', recipeSteps: ['Marinate paneer cubes.', 'Grill or fry the paneer.', 'Cook in a spicy tomato-based gravy and serve hot.'], type: 'veg' },
+        // Brunch
+        { id: 14, name: 'Avocado Toast', category: 'brunch', time: 10, description: 'Toasted bread with mashed avocado.', image: '/Images/Avocado Toast.jpg', recipeSteps: ['Toast bread.', 'Spread mashed avocado on top.', 'Add toppings of choice.'], type: 'veg' },
+        { id: 15, name: 'Bagel with Cream Cheese', category: 'brunch', time: 5, description: 'Bagel topped with cream cheese.', image: '/Images/Bagel with Cream Cheese.jpg', recipeSteps: ['Slice and toast bagel.', 'Spread cream cheese.', 'Add toppings if desired.'], type: 'veg' },
+
+        // Snacks
+        { id: 16, name: 'Samosa', category: 'snacks', time: 30, description: 'Fried pastry with spiced filling.', image: '/Images/Samosa.jpg', recipeSteps: ['Prepare filling.', 'Stuff and fold dough.', 'Deep fry until golden.'], type: 'veg' },
+        { id: 17, name: 'Chakli', category: 'snacks', time: 30, description: 'Crispy spiral snack made from rice flour.', image: '/Images/Chakli.jpg', recipeSteps: ['Prepare dough.', 'Shape into spirals.', 'Deep fry until crisp.'], type: 'veg' },
+        { id: 18, name: 'Burger', category: 'snacks', time: 20, description: 'Juicy burger with your choice of toppings.', image: '/Images/burger.jpg', recipeSteps: ['Grill the burger patty.', 'Toast the bun.', 'Assemble with lettuce, tomato, cheese, and condiments.'], type: 'non-veg' },
+        { id: 19, name: 'Pizza', category: 'snacks', time: 25, description: 'Delicious homemade pizza with various toppings.', image: '/Images/pizza.jpg', recipeSteps: ['Prepare or buy pizza dough.', 'Spread sauce and add toppings.', 'Bake until the crust is golden and cheese is melted.'], type: 'veg' },
+        { id: 20, name: 'Sandwich', category: 'snacks', time: 10, description: 'Simple yet satisfying sandwich.', image: '/Images/bombay sandwich.webp', recipeSteps: ['Choose your favorite bread.', 'Add fillings like cheese, ham, veggies, and condiments.', 'Grill or serve as is.'], type: 'non-veg' },
+        
+        // Dinner
+        { id: 21, name: 'Spaghetti', category: 'dinner', time: 25, description: 'Spaghetti with marinara sauce.', image: '/Images/Spaghetti.jpg', recipeSteps: ['Cook spaghetti.', 'Prepare sauce and mix.'], type: 'veg' },
+        { id: 22, name: 'Butter Chicken', category: 'dinner', time: 40, description: 'Creamy tomato-based chicken curry.', image: '/Images/Butter Chicken.jpg', recipeSteps: ['Cook chicken in a creamy tomato sauce.', 'Serve with naan or rice.'], type: 'non-veg' }
+    ];
+    function displayRecipes(filteredRecipes) {
+        const recipeList = document.getElementById('recipe-list');
+        recipeList.innerHTML = ''; // Clear previous results
+
+        console.log(filteredRecipes); // Debugging line to check filtered recipes
+
+        filteredRecipes.forEach(recipe => {
+            const recipeCard = document.createElement('div');
+            recipeCard.classList.add('recipe');
+            recipeCard.onclick = () => openModal(recipe);
+            recipeCard.innerHTML = `
+                <img src="${recipe.image}" alt="${recipe.name}">
+                <h3>${recipe.name}</h3>
+                <p>${recipe.description}</p>
+            `;
+            recipeList.appendChild(recipeCard);
+        });
+    }
+
+    function applyFilters() {
+        const searchInput = document.getElementById('search').value.toLowerCase();
+        const filteredRecipes = recipes.filter(recipe => recipe.name.toLowerCase().includes(searchInput));
+        displayRecipes(filteredRecipes);
+    }
+
+    function openModal(recipe) {
+        document.getElementById('modalTitle').textContent = recipe.name;
+        document.getElementById('modalImage').src = recipe.image;
+        document.getElementById('modalDescription').textContent = recipe.description;
+
+        const modalRecipeSteps = document.getElementById('modalRecipeSteps');
+        modalRecipeSteps.innerHTML = ''; // Clear previous steps
+        recipe.recipeSteps.forEach(step => {
+            const p = document.createElement('p');
+            p.textContent = step;
+            modalRecipeSteps.appendChild(p);
+        });
+
+        document.getElementById('recipeModal').style.display = 'block';
+    }
+
+    document.querySelector('.close').onclick = function() {
+        document.getElementById('recipeModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('recipeModal')) {
+            document.getElementById('recipeModal').style.display = 'none';
+        }
+    }
+
+    displayRecipes(recipes); // Initial call to display all recipes
+</script>
+</body>
+</html>
